@@ -12,10 +12,6 @@ services:
       ADMIN_USERNAME: admin
       ADMIN_PASSWORD: admin123
     volumes:
-      - ad_terminal_data:/app/data
-      - ad_terminal_media:/app/media
+      - ./data:/app/data
+      - ./media:/app/media
     restart: unless-stopped
-
-volumes:
-  ad_terminal_data:
-  ad_terminal_media:

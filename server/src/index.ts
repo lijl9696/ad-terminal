@@ -41,6 +41,11 @@ function assetType(mime: string) {
   return null;
 }
 
+function normalizeUploadName(name: string) {
+  const decoded = Buffer.from(name, "latin1").toString("utf8");
+  return decoded.includes("�") ? name : decoded;
+}
+
 function auth(req: express.Request, res: express.Response, next: express.NextFunction) {
   const token = req.signedCookies?.session;
   if (!token) return res.status(401).json({ error: "未登录" });
@@ -157,14 +162,15 @@ app.post("/api/media", auth, upload.single("file"), (req, res) => {
     return res.status(400).json({ error: "只支持图片和视频" });
   }
   const hash = sha256(req.file.path);
-  const ext = path.extname(req.file.originalname).toLowerCase() || (type === "image" ? ".jpg" : ".mp4");
+  const originalName = normalizeUploadName(req.file.originalname);
+  const ext = path.extname(originalName).toLowerCase() || (type === "image" ? ".jpg" : ".mp4");
   const storageName = `${Date.now()}-${hash.slice(0, 12)}${ext}`;
   fs.renameSync(req.file.path, path.join(mediaDir, storageName));
   const folderId = req.body?.folderId ? Number(req.body.folderId) : null;
   const result = db.prepare(`
     INSERT INTO media_assets (folder_id, original_name, display_name, type, mime_type, size, storage_name, sha256, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(folderId, req.file.originalname, req.file.originalname, type, req.file.mimetype, req.file.size, storageName, hash, now());
+  `).run(folderId, originalName, originalName, type, req.file.mimetype, req.file.size, storageName, hash, now());
   res.json({ asset: serializeAsset(get("SELECT * FROM media_assets WHERE id = ?", [result.lastInsertRowid])) });
 });
 

@@ -16,6 +16,7 @@ button { border: 1px solid var(--line); background: #fff; color: var(--ink); bor
 button:hover { border-color: var(--accent); }
 input, select { border: 1px solid var(--line); border-radius: 8px; padding: 10px 11px; background: #fff; min-width: 0; }
 h1, h2, p { margin: 0; }
+h3 { margin: 0 0 10px; font-size: 17px; }
 
 .shell { min-height: 100vh; display: grid; grid-template-columns: 236px 1fr; }
 .sidebar { background: #10231d; color: #f7fbf8; padding: 22px; display: flex; flex-direction: column; gap: 28px; }
@@ -45,16 +46,26 @@ main { padding: 26px; overflow: auto; }
 .stat span { color: var(--muted); }
 .stat strong { display: block; font-size: 38px; margin-top: 14px; }
 .sectionHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
+.hint { color: var(--muted); font-size: 13px; margin-top: 5px; }
+.empty { color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; padding: 14px; }
 .inlineForm { display: flex; gap: 10px; margin-bottom: 16px; }
 .inlineForm input { min-width: 260px; }
 .assetGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.mediaLayout { display: grid; grid-template-columns: 180px 1fr; gap: 14px; align-items: start; }
+.folderRail { display: grid; gap: 7px; }
+.folderRail button { justify-content: space-between; }
+.folderRail button.selected { border-color: var(--accent); background: #eef7f2; }
+.fieldLabel { display: grid; gap: 5px; color: var(--muted); font-size: 12px; }
 .asset { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 8px; }
 .asset strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .asset span, .row span, .listButton span { color: var(--muted); font-size: 13px; }
 .thumb { height: 120px; background: #edf2ee; border-radius: 6px; display: grid; place-items: center; overflow: hidden; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; }
 .table { display: grid; gap: 10px; }
-.row { display: grid; grid-template-columns: minmax(170px, 1.2fr) 180px 1.4fr auto; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+.deviceSections { display: grid; gap: 22px; }
+.row { display: grid; grid-template-columns: minmax(220px, 1.1fr) 180px 1.4fr 110px; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+.pendingRow { background: #fffaf0; border-color: #efd391; }
+.row button:disabled { opacity: .5; cursor: default; }
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .chip { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; display: inline-flex; gap: 5px; align-items: center; background: #fff; }
 .twoCol { display: grid; grid-template-columns: 280px 1fr; gap: 14px; }
@@ -67,11 +78,16 @@ main { padding: 26px; overflow: auto; }
 .playlistItems { display: grid; gap: 8px; min-height: 80px; }
 .itemRow { display: grid; grid-template-columns: 34px 1fr 110px 120px 44px; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
 .publishBox { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.actionBox { margin-top: 8px; }
+.stepTitle { display: grid; grid-template-columns: 28px auto 1fr; gap: 10px; align-items: center; margin: 16px 0 10px; color: var(--muted); }
+.stepTitle span { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; }
+.stepTitle strong { color: var(--ink); }
+.stepTitle em { font-style: normal; font-size: 13px; }
 .uploadButton { position: relative; }
 
 @media (max-width: 900px) {
   .shell { grid-template-columns: 1fr; }
   .sidebar { position: static; }
-  .grid4, .twoCol { grid-template-columns: 1fr; }
+  .grid4, .twoCol, .mediaLayout { grid-template-columns: 1fr; }
   .row, .editorHeader, .itemRow { grid-template-columns: 1fr; }
 }

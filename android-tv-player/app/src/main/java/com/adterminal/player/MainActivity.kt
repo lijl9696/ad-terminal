@@ -1,13 +1,17 @@
 package com.adterminal.player
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
@@ -59,6 +63,18 @@ class MainActivity : Activity() {
         stopped = true
     }
 
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_SETTINGS) {
+            showPlayerMenu()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onBackPressed() {
+        showPlayerMenu()
+    }
+
     private fun hideSystemUi() {
         window.decorView.systemUiVisibility =
             View.SYSTEM_UI_FLAG_FULLSCREEN or
@@ -97,11 +113,50 @@ class MainActivity : Activity() {
         box.addView(status)
         root.addView(box, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
         button.setOnClickListener {
-            val server = input.text.toString().trim().trimEnd('/')
+            val server = normalizeServerUrl(input.text.toString())
             if (server.isEmpty()) return@setOnClickListener
             prefs.edit().putString("serverUrl", server).apply()
             requestPairing(server, status)
         }
+    }
+
+    private fun showPlayerMenu() {
+        runOnUiThread {
+            AlertDialog.Builder(this)
+                .setTitle("播放器设置")
+                .setMessage("当前后台：${prefs.getString("serverUrl", "未配置")}\n菜单键或返回键可打开此窗口。")
+                .setPositiveButton("重新配置后台") { _, _ -> resetConfiguration() }
+                .setNegativeButton("继续播放", null)
+                .setNeutralButton("打开系统设置") { _, _ -> startActivity(Intent(Settings.ACTION_SETTINGS)) }
+                .show()
+        }
+    }
+
+    private fun resetConfiguration() {
+        prefs.edit()
+            .remove("deviceToken")
+            .remove("pairingCode")
+            .remove("pendingToken")
+            .remove("manifest")
+            .remove("version")
+            .apply()
+        items.clear()
+        version = 0L
+        index = 0
+        showSetup()
+    }
+
+    private fun normalizeServerUrl(raw: String): String {
+        var value = raw.trim().trimEnd('/')
+        if (value.isEmpty()) return ""
+        if (!value.startsWith("http://") && !value.startsWith("https://")) {
+            value = "http://$value"
+        }
+        val uri = Uri.parse(value)
+        if ((uri.scheme == "http" || uri.scheme == "https") && uri.port == -1 && !uri.host.isNullOrEmpty()) {
+            value = "$value:8787"
+        }
+        return value
     }
 
     private fun requestPairing(server: String, status: TextView) {
