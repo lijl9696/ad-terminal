@@ -1,0 +1,41 @@
+name: Build Android TV APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "android-tv-player/**"
+      - ".github/workflows/android-apk.yml"
+
+jobs:
+  build-debug-apk:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      - name: Build APK
+        working-directory: android-tv-player
+        run: gradle :app:assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ad-terminal-tv-debug-apk
+          path: android-tv-player/app/build/outputs/apk/debug/app-debug.apk

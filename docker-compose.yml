@@ -1,0 +1,21 @@
+services:
+  ad-terminal:
+    build: .
+    ports:
+      - "8787:8787"
+    environment:
+      NODE_ENV: production
+      PORT: 8787
+      DATA_DIR: /app/data
+      MEDIA_DIR: /app/media
+      SESSION_SECRET: change-this-local-secret
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: admin123
+    volumes:
+      - ad_terminal_data:/app/data
+      - ad_terminal_media:/app/media
+    restart: unless-stopped
+
+volumes:
+  ad_terminal_data:
+  ad_terminal_media:
