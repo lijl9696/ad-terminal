@@ -102,7 +102,7 @@ class MainActivity : Activity() {
         box.gravity = Gravity.CENTER
         box.setPadding(48, 48, 48, 48)
         val title = TextView(this)
-        title.text = "广告终端播放器 0.1.1"
+        title.text = "广告终端播放器 0.1.2"
         title.textSize = 32f
         title.setTextColor(Color.WHITE)
         val input = EditText(this)
@@ -147,7 +147,7 @@ class MainActivity : Activity() {
             val message = """
                 当前后台：${prefs.getString("serverUrl", "未配置")}
                 当前版本：$version
-                App 版本：0.1.1
+                App 版本：0.1.2
 
                 打开方式：返回键、菜单键、设置键，或长按确认键。
                 Home 键由电视系统处理，只有设为默认桌面后才会回到本应用。
@@ -205,7 +205,7 @@ class MainActivity : Activity() {
     private fun requestPairing(server: String, status: TextView) {
         thread {
             try {
-                val res = postJson("$server/api/player/pairing", JSONObject().put("appVersion", "0.1.1"), null)
+                val res = postJson("$server/api/player/pairing", JSONObject().put("appVersion", "0.1.2"), null)
                 val code = res.getString("pairingCode")
                 val pending = res.getString("pendingToken")
                 prefs.edit().putString("pairingCode", code).putString("pendingToken", pending).apply()
@@ -388,7 +388,7 @@ class MainActivity : Activity() {
         val token = prefs.getString("deviceToken", "") ?: return
         thread {
             try {
-                val body = JSONObject().put("currentVersion", version).put("currentItem", current ?: JSONObject.NULL).put("appVersion", "0.1.1")
+                val body = JSONObject().put("currentVersion", version).put("currentItem", current ?: JSONObject.NULL).put("appVersion", "0.1.2")
                 postJson("$server/api/player/heartbeat", body, token)
             } catch (_: Exception) {}
         }
