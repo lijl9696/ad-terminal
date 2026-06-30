@@ -32,7 +32,16 @@ jobs:
 
       - name: Build APK
         working-directory: android-tv-player
-        run: gradle :app:assembleDebug --no-daemon
+        run: gradle :app:assembleDebug --no-daemon --stacktrace --info
+
+      - name: Upload build reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-reports
+          path: |
+            android-tv-player/app/build/reports/**
+            android-tv-player/build/reports/**
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
