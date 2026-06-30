@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.Build
 import android.provider.Settings
 import android.view.Gravity
 import android.view.KeyEvent
@@ -41,6 +42,7 @@ class MainActivity : Activity() {
     private var index = 0
     private lateinit var root: FrameLayout
     private var stopped = false
+    private var menuShowing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,16 +65,24 @@ class MainActivity : Activity() {
         stopped = true
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_SETTINGS) {
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN && shouldOpenMenu(event)) {
             showPlayerMenu()
             return true
         }
-        return super.onKeyDown(keyCode, event)
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onBackPressed() {
         showPlayerMenu()
+    }
+
+    private fun shouldOpenMenu(event: KeyEvent): Boolean {
+        val code = event.keyCode
+        if (code == KeyEvent.KEYCODE_MENU || code == KeyEvent.KEYCODE_SETTINGS || code == KeyEvent.KEYCODE_INFO) return true
+        if (code == KeyEvent.KEYCODE_BACK) return true
+        if (event.isLongPress && (code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER || code == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)) return true
+        return false
     }
 
     private fun hideSystemUi() {
@@ -92,7 +102,7 @@ class MainActivity : Activity() {
         box.gravity = Gravity.CENTER
         box.setPadding(48, 48, 48, 48)
         val title = TextView(this)
-        title.text = "广告终端播放器"
+        title.text = "广告终端播放器 0.1.1"
         title.textSize = 32f
         title.setTextColor(Color.WHITE)
         val input = EditText(this)
@@ -107,10 +117,20 @@ class MainActivity : Activity() {
         status.setTextColor(Color.WHITE)
         status.textSize = 22f
         status.gravity = Gravity.CENTER
+        val help = TextView(this)
+        help.text = "播放界面：长按确认键打开设置。若要让 Home 键回到本应用，请在系统默认桌面中选择广告终端播放器。"
+        help.setTextColor(Color.LTGRAY)
+        help.textSize = 16f
+        help.gravity = Gravity.CENTER
         box.addView(title)
         box.addView(input, LinearLayout.LayoutParams(720, LinearLayout.LayoutParams.WRAP_CONTENT))
         box.addView(button)
+        val settingsButton = Button(this)
+        settingsButton.text = "打开默认桌面设置"
+        settingsButton.setOnClickListener { openHomeSettings() }
+        box.addView(settingsButton)
         box.addView(status)
+        box.addView(help, LinearLayout.LayoutParams(900, LinearLayout.LayoutParams.WRAP_CONTENT))
         root.addView(box, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
         button.setOnClickListener {
             val server = normalizeServerUrl(input.text.toString())
@@ -121,14 +141,37 @@ class MainActivity : Activity() {
     }
 
     private fun showPlayerMenu() {
+        if (menuShowing) return
+        menuShowing = true
         runOnUiThread {
+            val message = """
+                当前后台：${prefs.getString("serverUrl", "未配置")}
+                当前版本：$version
+                App 版本：0.1.1
+
+                打开方式：返回键、菜单键、设置键，或长按确认键。
+                Home 键由电视系统处理，只有设为默认桌面后才会回到本应用。
+            """.trimIndent()
             AlertDialog.Builder(this)
                 .setTitle("播放器设置")
-                .setMessage("当前后台：${prefs.getString("serverUrl", "未配置")}\n菜单键或返回键可打开此窗口。")
+                .setMessage(message)
                 .setPositiveButton("重新配置后台") { _, _ -> resetConfiguration() }
                 .setNegativeButton("继续播放", null)
-                .setNeutralButton("打开系统设置") { _, _ -> startActivity(Intent(Settings.ACTION_SETTINGS)) }
+                .setNeutralButton("默认桌面设置") { _, _ -> openHomeSettings() }
+                .setOnDismissListener { menuShowing = false }
                 .show()
+        }
+    }
+
+    private fun openHomeSettings() {
+        try {
+            if (Build.VERSION.SDK_INT >= 21) {
+                startActivity(Intent(Settings.ACTION_HOME_SETTINGS))
+            } else {
+                startActivity(Intent(Settings.ACTION_SETTINGS))
+            }
+        } catch (_: Exception) {
+            startActivity(Intent(Settings.ACTION_SETTINGS))
         }
     }
 
@@ -162,7 +205,7 @@ class MainActivity : Activity() {
     private fun requestPairing(server: String, status: TextView) {
         thread {
             try {
-                val res = postJson("$server/api/player/pairing", JSONObject().put("appVersion", "0.1.0"), null)
+                val res = postJson("$server/api/player/pairing", JSONObject().put("appVersion", "0.1.1"), null)
                 val code = res.getString("pairingCode")
                 val pending = res.getString("pendingToken")
                 prefs.edit().putString("pairingCode", code).putString("pendingToken", pending).apply()
@@ -345,7 +388,7 @@ class MainActivity : Activity() {
         val token = prefs.getString("deviceToken", "") ?: return
         thread {
             try {
-                val body = JSONObject().put("currentVersion", version).put("currentItem", current ?: JSONObject.NULL).put("appVersion", "0.1.0")
+                val body = JSONObject().put("currentVersion", version).put("currentItem", current ?: JSONObject.NULL).put("appVersion", "0.1.1")
                 postJson("$server/api/player/heartbeat", body, token)
             } catch (_: Exception) {}
         }
