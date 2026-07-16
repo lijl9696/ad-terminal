@@ -46,6 +46,20 @@ http://192.168.1.10:8787
 
 这个 debug APK 可用于小米电视本地安装测试。
 
+## Windows 播放终端
+
+Windows 播放器源码位于 `windows-player/`。它与 Android 电视端使用同一套后台接口，支持配对、全屏播放、素材缓存、断网续播、节目自动更新和开机自启动。
+
+在 GitHub 仓库中打开：
+
+`Actions` -> `Build Windows Player` -> `Run workflow`
+
+构建完成后，在该次运行页面的 `Artifacts` 下载 `pengshi-windows-player`，解压后运行：
+
+`Pengshi-Signage-Player-Setup-0.1.0.exe`
+
+首次启动输入群晖后台地址，在管理后台“设备”页完成配对。播放器运行时按 `F10` 或 `Esc` 打开设置，可开启“开机自动启动”、更改后台地址、退出全屏或关闭播放器。
+
 ## 电视端控制说明
 
 - 后台地址可以输入 `192.168.201.213:8787` 或 `http://192.168.201.213:8787`，新版 APK 会自动补全协议。

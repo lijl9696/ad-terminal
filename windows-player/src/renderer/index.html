@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>彭世播放终端</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main id="player" class="player"></main>
+
+    <section id="setup" class="screen hidden">
+      <div class="setup-panel">
+        <img id="brand-logo" class="brand-logo" alt="彭世集团" />
+        <div class="brand-copy">
+          <h1>彭世集团——播放终端控制系统</h1>
+          <p id="version-label">Windows 播放端</p>
+        </div>
+        <form id="server-form">
+          <label for="server-url">后台地址</label>
+          <div class="field-row">
+            <input id="server-url" autocomplete="off" placeholder="例如 192.168.201.213:8787" />
+            <button type="submit" class="primary">连接后台</button>
+          </div>
+        </form>
+        <div id="pairing" class="pairing hidden">
+          <span>配对码</span>
+          <strong id="pairing-code"></strong>
+          <p>请到管理后台的“设备”页面确认绑定</p>
+        </div>
+        <p id="setup-status" class="status"></p>
+      </div>
+    </section>
+
+    <section id="empty" class="screen hidden">
+      <div class="empty-state">
+        <img id="empty-logo" class="empty-logo" alt="彭世集团" />
+        <h2>播放终端已连接</h2>
+        <p id="empty-message">等待后台发布节目</p>
+      </div>
+    </section>
+
+    <aside id="settings" class="settings hidden" aria-label="播放器设置">
+      <div class="settings-header">
+        <div>
+          <span class="eyebrow">播放终端</span>
+          <h2>设置</h2>
+        </div>
+        <button id="close-settings" class="icon-button" title="关闭设置" aria-label="关闭设置">×</button>
+      </div>
+      <dl class="device-info">
+        <div><dt>后台地址</dt><dd id="current-server">未配置</dd></div>
+        <div><dt>节目版本</dt><dd id="current-version">0</dd></div>
+        <div><dt>播放器版本</dt><dd id="current-app-version">0.1.0</dd></div>
+      </dl>
+      <label class="toggle-row">
+        <span><strong>开机自动启动</strong><small>登录 Windows 后自动进入播放</small></span>
+        <input id="auto-launch" type="checkbox" />
+      </label>
+      <div class="settings-actions">
+        <button id="reset-player">更改后台并重新配对</button>
+        <button id="exit-fullscreen">退出全屏</button>
+        <button id="quit-player" class="danger">退出播放器</button>
+      </div>
+      <p class="shortcut">播放时按 F10 或 Esc 可随时打开此设置。</p>
+    </aside>
+
+    <div id="download" class="download hidden">
+      <span id="download-name">正在下载节目</span>
+      <div class="progress"><i id="download-bar"></i></div>
+      <small id="download-detail"></small>
+    </div>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

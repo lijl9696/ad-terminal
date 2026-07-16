@@ -5,3 +5,5 @@ data/
 media/
 .DS_Store
 *.log
+windows-player/dist/
+windows-player/node_modules/

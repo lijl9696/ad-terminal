@@ -1,0 +1,40 @@
+name: Build Windows Player
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "windows-player/**"
+      - "public/pengshi-logo.png"
+      - ".github/workflows/windows-player.yml"
+
+jobs:
+  build-windows-installer:
+    name: Build Windows installer
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: windows-player
+        run: npm install
+
+      - name: Build Windows installer
+        working-directory: windows-player
+        run: npm run dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengshi-windows-player
+          path: windows-player/dist/*.exe
+          if-no-files-found: error

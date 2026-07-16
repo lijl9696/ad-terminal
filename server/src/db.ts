@@ -69,6 +69,21 @@ export function initDb() {
       FOREIGN KEY(folder_id) REFERENCES media_folders(id) ON DELETE SET NULL
     );
 
+    CREATE TABLE IF NOT EXISTS media_tags (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      color TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS media_asset_tag_links (
+      asset_id INTEGER NOT NULL,
+      tag_id INTEGER NOT NULL,
+      PRIMARY KEY(asset_id, tag_id),
+      FOREIGN KEY(asset_id) REFERENCES media_assets(id) ON DELETE CASCADE,
+      FOREIGN KEY(tag_id) REFERENCES media_tags(id) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS device_tags (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE,

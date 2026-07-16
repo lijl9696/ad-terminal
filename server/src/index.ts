@@ -67,6 +67,10 @@ function tagsForDevice(deviceId: number) {
   return all("SELECT t.* FROM device_tags t JOIN device_tag_links l ON l.tag_id = t.id WHERE l.device_id = ? ORDER BY t.name", [deviceId]);
 }
 
+function tagsForAsset(assetId: number) {
+  return all("SELECT t.* FROM media_tags t JOIN media_asset_tag_links l ON l.tag_id = t.id WHERE l.asset_id = ? ORDER BY t.name", [assetId]);
+}
+
 function serializeAsset(row: any) {
   return {
     id: row.id,
@@ -81,7 +85,8 @@ function serializeAsset(row: any) {
     height: row.height,
     url: `/media/${row.storage_name}`,
     sha256: row.sha256,
-    createdAt: row.created_at
+    createdAt: row.created_at,
+    tags: tagsForAsset(row.id)
   };
 }
 
@@ -150,6 +155,19 @@ app.delete("/api/folders/:id", auth, (req, res) => {
   res.json({ ok: true });
 });
 
+app.get("/api/media-tags", auth, (_req, res) => res.json({ tags: all("SELECT * FROM media_tags ORDER BY name") }));
+app.post("/api/media-tags", auth, (req, res) => {
+  const name = String(req.body?.name || "").trim();
+  const color = String(req.body?.color || "#236b55");
+  if (!name) return res.status(400).json({ error: "标签名不能为空" });
+  const result = db.prepare("INSERT INTO media_tags (name, color, created_at) VALUES (?, ?, ?)").run(name, color, now());
+  res.json({ tag: get("SELECT * FROM media_tags WHERE id = ?", [result.lastInsertRowid]) });
+});
+app.delete("/api/media-tags/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM media_tags WHERE id = ?").run(Number(req.params.id));
+  res.json({ ok: true });
+});
+
 app.get("/api/media", auth, (_req, res) => {
   res.json({ assets: all<any>("SELECT * FROM media_assets ORDER BY created_at DESC").map(serializeAsset) });
 });
@@ -176,8 +194,14 @@ app.post("/api/media", auth, upload.single("file"), (req, res) => {
 
 app.patch("/api/media/:id", auth, (req, res) => {
   const id = Number(req.params.id);
-  db.prepare("UPDATE media_assets SET display_name = COALESCE(?, display_name), folder_id = ? WHERE id = ?")
-    .run(req.body.displayName || null, req.body.folderId || null, id);
+  db.prepare("UPDATE media_assets SET display_name = COALESCE(?, display_name), folder_id = COALESCE(?, folder_id) WHERE id = ?")
+    .run(req.body.displayName || null, req.body.folderId ?? null, id);
+  if (Array.isArray(req.body.tagIds)) {
+    db.prepare("DELETE FROM media_asset_tag_links WHERE asset_id = ?").run(id);
+    for (const tagId of req.body.tagIds) {
+      db.prepare("INSERT OR IGNORE INTO media_asset_tag_links (asset_id, tag_id) VALUES (?, ?)").run(id, Number(tagId));
+    }
+  }
   res.json({ asset: serializeAsset(get("SELECT * FROM media_assets WHERE id = ?", [id])) });
 });
 
