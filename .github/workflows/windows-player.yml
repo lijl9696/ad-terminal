@@ -24,13 +24,11 @@ jobs:
 
       - name: Install dependencies
         working-directory: windows-player
-        run: npm install
+        run: npm ci
 
       - name: Build Windows installer
         working-directory: windows-player
         run: npm run dist
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
